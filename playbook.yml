@@ -1,0 +1,65 @@
+- hosts: 127.0.0.1
+  user: vagrant
+  connection: local
+  become: yes
+  vars:
+    pyenv_install_dir: /home/vagrant/pyenv
+    env_setting_file: /home/vagrant/.bashrc
+    zone: Asia/Tokyo
+    zoneinfo_path: /usr/share/zoneinfo/Asia/Tokyo
+
+  tasks:
+    - name: install Development tooles
+      yum: name={{ item }} state=installed
+      with_items:
+        #- epol-release
+        - nano
+        - git
+        - curl
+        - openssl-devel
+        - make
+        - gcc-c++
+        - zlib
+        - zlib-devel
+        - curl-devel
+        - nginx
+        - patch
+        - readline-devel
+        - sqlite-devel
+        - libxml2-devel
+        - libxslt-devel
+        - bzip2-devel
+        - python-devel
+        - libsemanage-python
+        - libselinux-python
+        - gdbm
+        - gdbm-devel
+        #- numpy
+        #- scipy
+        #- python-matplotlib
+        #- ipython
+        #- python-pandas
+
+    - name: set zone to /etc/sysconfig/clock
+      replace: >
+        dest=/etc/sysconfig/clock
+        regexp='^ZONE=\"UTC\"'
+        replace='ZONE="{{zone}}"'
+    - name: set localtime
+      file: >
+        src={{zoneinfo_path}}
+        dest=/etc/localtime
+        state=link
+        force=yes
+    - name: install pyenv
+      shell: $ curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
+
+    - name: Install pip
+      shell: curl -kL https://bootstrap.pypa.io/get-pip.py | python
+
+    - name: pyenv install
+      git: repo=git://github.com/yyuu/pyenv.git
+           dest={{ pyenv_install_dir }} accept_hostkey=yes
+
+    - name: copy bashrc
+      copy: src=/home/vagrant/work/.bashrc dest=/home/vagrant/.bashrc backup=yes
