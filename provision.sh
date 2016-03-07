@@ -5,4 +5,6 @@ if ! [ `which ansible` ]; then
     yum install -y install ansible
 fi
 
-ansible-playbook work/playbook.yml -i work/hosts
+sudo cp work/hosts /tmp/temp_hosts
+sudo chmod -x /tmp/temp_hosts
+bash -c "ansible-playbook work/playbook.yml --inventory-file=/tmp/temp_hosts"
