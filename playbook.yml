@@ -63,3 +63,12 @@
 
     - name: copy bashrc
       copy: src=/home/vagrant/work/.bashrc dest=/home/vagrant/.bashrc backup=yes
+
+    - name: install anaconda2-2.5.0
+      command: /home/vagrant/pyenv/bin/pyenv install anaconda2-2.5.0
+      sudo: no
+
+
+    - name: set global anaconda2-2.5.0
+      command: /home/vagrant/pyenv/bin/pyenv global anaconda2-2.5.0
+      sudo: no
