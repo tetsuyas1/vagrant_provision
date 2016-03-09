@@ -1,0 +1,72 @@
+- hosts: 127.0.0.1
+  remote_user: vagrant
+  connection: local
+  become: yes
+  vars:
+    pyenv_install_dir: /home/vagrant/pyenv
+    env_setting_file: /home/vagrant/.bashrc
+    zone: Asia/Tokyo
+    zoneinfo_path: /usr/share/zoneinfo/Asia/Tokyo
+    python_version: anaconda2-2.5.0
+
+  tasks:
+    - name: install Development tooles
+      yum: name={{ item }} state=installed
+      with_items:
+        #- epol-release
+        - nano
+        - git
+        - curl
+        - openssl-devel
+        - make
+        - gcc-c++
+        - zlib
+        - zlib-devel
+        - curl-devel
+        - nginx
+        - patch
+        - readline-devel
+        - sqlite-devel
+        - libxml2-devel
+        - libxslt-devel
+        - bzip2-devel
+        - python-devel
+        - libsemanage-python
+        - libselinux-python
+        - gdbm
+        - gdbm-devel
+        #- numpy
+        #- scipy
+        #- python-matplotlib
+        #- ipython
+        #- python-pandas
+
+    - name: set zone to /etc/sysconfig/clock
+      replace: >
+        dest=/etc/sysconfig/clock
+        regexp='^ZONE=\"UTC\"'
+        replace='ZONE="{{zone}}"'
+    - name: set localtime
+      file: >
+        src={{zoneinfo_path}}
+        dest=/etc/localtime
+        state=link
+        force=yes
+
+    - name: install pyenv
+      args:
+        ## guard for only once.
+        creates: ~/.pyenv
+      shell: |
+        git clone https://github.com/yyuu/pyenv.git ~/.pyenv
+        ## add pyenv env
+        (
+            echo 'export PYENV_ROOT=~/.pyenv'
+            echo 'export PATH=$PYENV_ROOT/bin:$PATH'
+            echo 'eval "$(pyenv init -)"'
+        ) >> ~/.bashrc
+        source ~/.bashrc
+        # install python
+        pyenv install {{python_version}}
+        pyenv rehash
+        pyenv global {{python_version}}
