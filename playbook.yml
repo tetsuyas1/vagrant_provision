@@ -61,10 +61,9 @@
     - name: copy bashrc
       copy: src=/home/vagrant/work/.bashrc dest=/home/vagrant/.bashrc backup=yes
 
-    - name: install pyenv
+    - name: install anaconda2
       shell: |
           source ~/.bashrc
-          # install python
           pyenv install anaconda2-2.5.0
           pyenv rehash
           pyenv global anaconda2-2.5.0
