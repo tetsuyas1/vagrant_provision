@@ -1,15 +1,15 @@
 - hosts: 127.0.0.1
-  remote_user: vagrant
+  user: vagrant
   connection: local
-  become: yes
   vars:
-    pyenv_install_dir: /home/vagrant/pyenv
+    pyenv_install_dir: /home/vagrant/.pyenv
     env_setting_file: /home/vagrant/.bashrc
     zone: Asia/Tokyo
     zoneinfo_path: /usr/share/zoneinfo/Asia/Tokyo
 
   tasks:
     - name: install Development tooles
+      become: yes
       yum: name={{ item }} state=installed
       with_items:
         #- epol-release
@@ -41,40 +41,30 @@
         #- python-pandas
 
     - name: set zone to /etc/sysconfig/clock
+      become: yes      
       replace: >
         dest=/etc/sysconfig/clock
         regexp='^ZONE=\"UTC\"'
         replace='ZONE="{{zone}}"'
     - name: set localtime
+      become: yes
       file: >
         src={{zoneinfo_path}}
         dest=/etc/localtime
         state=link
         force=yes
-    - name: install pyenv
-      shell: $ curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
 
-    - name: Install pip
-      shell: curl -kL https://bootstrap.pypa.io/get-pip.py | python
-
-    - name: pyenv install
+    - name: git clone pyenv 
       git: repo=git://github.com/yyuu/pyenv.git
            dest={{ pyenv_install_dir }} accept_hostkey=yes
 
     - name: copy bashrc
       copy: src=/home/vagrant/work/.bashrc dest=/home/vagrant/.bashrc backup=yes
 
-    - name: reload bashrc
-      remote_user: vagrant #ホントは不要？
-      sudo: no
-      command: source ~/.bashrc
-
-    - name: install anaconda2-2.5.0
-      remote_user: vagrant
-      sudo: no
-      command: /home/vagrant/pyenv/bin/pyenv install anaconda2-2.5.0
-
-    - name: set global anaconda2-2.5.0
-      remote_user: vagrant
-      sudo: no
-      command: /home/vagrant/pyenv/bin/pyenv global anaconda2-2.5.0
+    - name: install anaconda2
+      shell: |
+          source ~/.bashrc
+          pyenv install anaconda2-2.5.0
+          pyenv rehash
+          pyenv global anaconda2-2.5.0
+          
